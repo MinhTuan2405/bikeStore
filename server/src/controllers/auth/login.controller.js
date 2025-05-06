@@ -12,9 +12,6 @@ loginRouter.get ('/login', verifyToken, test, (req, res) => {
     })
 })
 
-loginRouter.get ('/test', (req, res) => {
-    res.send ('duma chay roi')
-})
 
 
 export default loginRouter
