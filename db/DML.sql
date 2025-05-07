@@ -3,17 +3,6 @@
 -- I. PRODUCT-RELATED QUERIES
 
 -- 1. Top 5 sản phẩm bán chạy nhất
-SELECT
-  p.product_name,
-  SUM(oi.quantity) AS total_quantity_sold,
-  SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue
-FROM sales.order_items oi
-JOIN production.products p ON oi.product_id = p.product_id
-GROUP BY p.product_name
-ORDER BY total_quantity_sold DESC
-LIMIT 5;
-
-
 WITH RankedProducts AS (
   SELECT
     p.product_name,
@@ -44,6 +33,7 @@ GROUP BY b.brand_name
 ORDER BY total_revenue DESC;
 
 -- 3. Doanh thu theo loại sản phẩm (category)
+explain
 SELECT
   c.category_name,
   SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue
