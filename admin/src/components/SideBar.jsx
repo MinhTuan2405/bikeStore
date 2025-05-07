@@ -9,7 +9,8 @@ import {
   ChevronDown,
   User,
   ChevronRight,
-  Briefcase
+  Briefcase,
+  Store 
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { handleLogout } from "../middlewares/logout";
@@ -108,6 +109,17 @@ export default function SideBar() {
                 subItems={[
                   { label: "Chỉ số tổng quan", to: "/staff" },
                   { label: "Manage Staff", to: "/product/action" },
+                ]}
+              />  
+
+
+              <DropdownNavItem
+                icon={<Store size={18} />}
+                label="Show Room"
+                collapsed={collapsed}
+                subItems={[
+                  { label: "Chỉ số tổng quan", to: "/staff" },
+                  { label: "Danh sách của hàng", to: "/product/action" },
                 ]}
               />  
               <NavItem icon={<Settings size={18} />} label="Cài đặt" to="/settings" collapsed={collapsed} />

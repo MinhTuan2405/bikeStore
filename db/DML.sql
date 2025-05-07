@@ -33,7 +33,6 @@ GROUP BY b.brand_name
 ORDER BY total_revenue DESC;
 
 -- 3. Doanh thu theo loại sản phẩm (category)
-explain
 SELECT
   c.category_name,
   SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue

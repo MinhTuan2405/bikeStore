@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import router from '../routes/indexRouter.js';
+import router from '../routes/index.routes.js';
 
 const app = express();
 
