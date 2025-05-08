@@ -17,6 +17,7 @@ import { handleLogout } from "../middlewares/logout";
 import { Link, useNavigate } from "react-router";
 
 export default function SideBar() {
+  console.log ('sidebar render')
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   

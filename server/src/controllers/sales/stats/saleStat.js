@@ -9,18 +9,26 @@ const saleStat = express.Router ()
 saleStat.get ('/revenuepermonth', async (req, res) => {
     try {
     const Analysis = await prisma.$queryRaw`
-        SELECT
-        TO_CHAR(DATE_TRUNC('month', o.order_date), 'MM/YYYY') AS month,
+      SELECT
+        DATE_TRUNC('month', o.order_date) AS month,
         SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS total_revenue
-        FROM sales.orders o
-        JOIN sales.order_items oi ON o.order_id = oi.order_id
-        GROUP BY o.order_date
-        ORDER BY DATE_TRUNC('month', o.order_date);
+      FROM sales.orders o
+      JOIN sales.order_items oi ON o.order_id = oi.order_id
+      GROUP BY month
+      ORDER BY month;
     `;
-    console.log (Analysis.month)
-    const formatted = convertDecimalToNumber(Analysis);
+    const data = Analysis.map(element => {
+      const d = new Date (element.month)
+      d.setUTCDate(d.getUTCDate() + 1);
+      const res = d.toISOString().slice (0, 7)
+      return {
+        month: res,
+        total: element.total_revenue
+      }
+      
+    });
+    const formatted = convertDecimalToNumber(data);
 
-    
     res.status(200).json({
         message: "success",
         data: formatted
