@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router"; // use react-router-dom, not just "react-router"
+import { createBrowserRouter } from "react-router-dom";
 
 import MainLayout from "../layouts/mainLayout";
 import ProductsPage from "../pages/products/Product.Page";
