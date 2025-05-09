@@ -86,9 +86,8 @@ export default function SideBar() {
                 label="Sản phẩm"
                 collapsed={collapsed}
                 subItems={[
-                  { label: "Overview", to: "/product" },
-                  { label: "Categories", to: "/product/categories" },
-                  { label: "Manage Product", to: "/product/new" },
+                  { label: "Overview", to: "/product/overview" },
+                  { label: "Manage Product", to: "/product/manage" },
                 ]}
               />
 
@@ -97,30 +96,20 @@ export default function SideBar() {
                 label="Nhân viên"
                 collapsed={collapsed}
                 subItems={[
-                  { label: "Danh sách nhân viên", to: "/staff" },
-                  { label: "Quản lý nhân viên", to: "/product/action" },
+                  { label: "Chỉ số nhân viên", to: "/staff/metric" },
+                  { label: "Quản lý nhân viên", to: "/staff/manage" },
                 ]}
               />
 
-              
-              <DropdownNavItem
-                icon={<Briefcase size={18} />}
-                label="Chỉ số kinh doanh"
-                collapsed={collapsed}
-                subItems={[
-                  { label: "Chỉ số tổng quan", to: "/staff" },
-                  { label: "Manage Staff", to: "/product/action" },
-                ]}
-              />  
-
+              <NavItem icon={<Briefcase size={18} />} label="Chỉ số kinh doanh" to="/sales/metrics" collapsed={collapsed} />
 
               <DropdownNavItem
                 icon={<Store size={18} />}
                 label="Show Room"
                 collapsed={collapsed}
                 subItems={[
-                  { label: "Chỉ số tổng quan", to: "/staff" },
-                  { label: "Danh sách của hàng", to: "/product/action" },
+                  { label: "Chỉ số tổng quan", to: "/showroom/metric" },
+                  { label: "Quản lý cửa hàng", to: "/showroom/manage" },
                 ]}
               />  
               <NavItem icon={<Settings size={18} />} label="Cài đặt" to="/settings" collapsed={collapsed} />
