@@ -75,7 +75,7 @@ productStat.get ('/revenue', async (req, res) => {
 
 
 // 3. Doanh thu theo loại sản phẩm (category)
-productStat.get ('/catgoryrevenue', async (req, res) => {
+productStat.get ('/categoryrevenue', async (req, res) => {
     try {
     const Analysis = await prisma.$queryRaw`
         SELECT
