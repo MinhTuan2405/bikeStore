@@ -77,6 +77,7 @@ export default function SaleMetricPage() {
         return <div>Error loading metrics</div>;
     }
 
+    // eslint-disable-next-line no-unused-vars
     const { summary, monthly_trend, sales_by_category, sales_by_brand, top_products, order_status_distribution } = metrics;
 
     // Top products columns

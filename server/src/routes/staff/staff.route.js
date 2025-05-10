@@ -14,13 +14,13 @@ router.get('/:id', staffController.getStaffById);
 router.get('/metrics/summary', staffController.getStaffMetrics);
 
 // Create new staff member
-router.post('/', verifyToken, staffController.createStaff);
+router.post('/', staffController.createStaff);
 
 // Update staff member
-router.put('/:id', verifyToken, staffController.updateStaff);
+router.put('/:id', staffController.updateStaff);
 
 // Delete staff member
-router.delete('/:id', verifyToken, staffController.deleteStaff);
+router.delete('/:id', staffController.deleteStaff);
 
 // Get staff members by store
 router.get('/by-store/:storeId', staffController.getStaffByStore);

@@ -122,6 +122,7 @@ export default function ShowroomManagePage() {
     // Xử lý xóa showroom
     const handleDelete = async (showroomId) => {
         try {
+            // eslint-disable-next-line no-unused-vars
             const response = await api.delete(`/showroom/${showroomId}`);
             message.success('Xóa showroom thành công');
             fetchShowrooms(); // Tải lại danh sách showroom
