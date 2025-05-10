@@ -1,0 +1,26 @@
+{
+  "rest-api": {
+    "command": "node",
+    "args": [
+      "/home/ductrung/.nvm/versions/node/v23.10.0/lib/node_modules/dkmaker-mcp-rest-api/build/index.js"
+    ],
+    "env": {
+      "REST_BASE_URL": "http://localhost:3000",
+      "AUTH_BASIC_USERNAME": "admin",
+      "AUTH_BASIC_PASSWORD": "admin",
+      "AUTH_BEARER": "your-token",
+      "AUTH_APIKEY_HEADER_NAME": "X-API-Key",
+      "AUTH_APIKEY_VALUE": "your-api-key",
+      "REST_ENABLE_SSL_VERIFY": "false",
+      "REST_RESPONSE_SIZE_LIMIT": "10000",
+      "HEADER_X-API-Version": "2.0",
+      "HEADER_Custom-Client": "my-client",
+      "HEADER_Accept": "application/json"
+    },
+    "disabled": false,
+    "alwaysAllow": [
+      "test_request"
+    ],
+    "timeout": 15
+  }
+}

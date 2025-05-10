@@ -209,7 +209,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\mnhtndev\\projects\\bikeStore\\server\\src\\generated\\prisma",
+      "value": "/home/ductrung/projectIE103/bikeStore/server/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -218,14 +218,14 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "debian-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [
       "multiSchema"
     ],
-    "sourceFilePath": "D:\\mnhtndev\\projects\\bikeStore\\server\\prisma\\schema.prisma",
+    "sourceFilePath": "/home/ductrung/projectIE103/bikeStore/server/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -239,12 +239,11 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "postgresql://postgres:%20@localhost:5432/bike_store_db"
       }
     }
   },
