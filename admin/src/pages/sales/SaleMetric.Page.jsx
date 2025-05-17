@@ -112,34 +112,6 @@ export default function SaleMetricPage() {
         },
     ];
 
-    // Cấu hình biểu đồ doanh thu theo tháng
-    const getMonthlyTrendConfig = () => {
-        return {
-            data: monthly_trend,
-            xField: 'month',
-            yField: 'revenue',
-            seriesField: 'type',
-            smooth: true,
-            autoFit: true,
-            padding: 'auto',
-            height: 300,
-            color: '#1890ff',
-            axis: {
-                y: {
-                    nice: true,
-                    grid: {
-                        line: {
-                            style: {
-                                stroke: '#ddd',
-                                lineDash: [4, 2]
-                            }
-                        }
-                    }
-                }
-            }
-        };
-    };
-
     // Cấu hình biểu đồ doanh thu theo danh mục
     const getCategoryChartConfig = () => {
         return {
@@ -223,21 +195,6 @@ export default function SaleMetricPage() {
             </Row>
 
             {/* Biểu đồ doanh thu theo tháng */}
-            <Card 
-                className="mb-6"
-                title={
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <BarChartOutlined style={{ marginRight: '8px', fontSize: '20px' }} />
-                        <span>Doanh thu theo tháng</span>
-                    </div>
-                }
-                styles={{ body: { padding: '12px' } }}
-            >
-                <div style={{ width: '100%', height: '300px' }}>
-                    <Line {...getMonthlyTrendConfig()} />
-                </div>
-            </Card>
-
             <Divider />
 
             {/* Biểu đồ doanh thu theo danh mục và phân bố trạng thái */}

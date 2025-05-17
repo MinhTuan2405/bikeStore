@@ -1,275 +1,347 @@
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-  Legend,
-  LineChart,
-  Line,
+  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
-//import api from '../../services/api'; // Giả sử đường dẫn này đúng
-import { useEffect, useState } from 'react';
-import { 
-  LineChart as LineChartIcon, // Đổi tên để tránh xung đột với component Recharts
-  BarChart3, 
-  PieChart as StockPieChartIcon, // Đổi tên để tránh xung đột
-  TrendingUp, 
-  Package, 
-  ShoppingCart,
-  Repeat // Biểu tượng cho vòng quay vốn
-} from 'lucide-react';
+import {
+  Card, CardContent, TextField, Button, CircularProgress, Alert,
+  FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, OutlinedInput // MUI components for Multi-Select
+} from '@mui/material';
+import axios from 'axios';
 
-// Dữ liệu mẫu cho tình trạng tồn kho
-const stockStatusData = [
-  { name: 'Còn hàng', value: 540, color: '#00C49F' },
-  { name: 'Sắp hết', value: 60, color: '#FFBB28' },
-  { name: 'Hết hàng', value: 20, color: '#FF8042' },
-];
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899', '#8b5cf6'];
 
-export default function ProductsPage() {
-  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
-  const [topTurnoverProducts, setTopTurnoverProducts] = useState([]); // State mới
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-2 bg-white shadow-lg rounded-md border border-gray-200">
+        <p className="label text-sm font-semibold text-gray-700">{`${label}`}</p>
+        {payload.map((entry, index) => (
+          <p key={`item-${index}`} style={{ color: entry.color }} className="text-xs">
+            {`${entry.name}: ${typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Dữ liệu mẫu để phát triển
-        const mockMonthlyRevenue = [
-          { month: 'Thg 1', total: 120000000 }, { month: 'Thg 2', total: 180000000 },
-          { month: 'Thg 3', total: 150000000 }, { month: 'Thg 4', total: 220000000 },
-          { month: 'Thg 5', total: 190000000 }, { month: 'Thg 6', total: 250000000 },
-        ];
-        const mockTopSellingProducts = [
-          { product_name: 'Xe đạp Alpha', total_quantity_sold: 120 },
-          { product_name: 'Xe đạp Beta', total_quantity_sold: 95 },
-          { product_name: 'Xe đạp Gamma', total_quantity_sold: 70 },
-        ];
-        const mockTurnoverApiData = [
-          { product_name: "Trek Domane SLR Frameset - 2018", total_sold: "9", total_stock: "10", turnover_rate: 0.9 },
-          { product_name: "Electra Superbolt 1 20\" - 2018", total_sold: "6", total_stock: "9", turnover_rate: 0.67 },
-          { product_name: "Scott Spark RC 900 - 2021", total_sold: "15", total_stock: "20", turnover_rate: 0.75 },
-          { product_name: "Giant TCR Advanced Pro - 2022", total_sold: "25", total_stock: "30", turnover_rate: 0.83 },
-          { product_name: "Electra Koa 3i Ladies' - 2018", total_sold: "33", total_stock: "72", turnover_rate: 0.46 },
-          { product_name: "Cannondale Quick CX 3 - 2020", total_sold: "50", total_stock: "60", turnover_rate: 0.833 },
-          { product_name: "Specialized Allez Sprint - 2019", total_sold: "22", total_stock: "25", turnover_rate: 0.88 },
-          { product_name: "Electra Cruiser 1 Ladies' - 2018", total_sold: "18", total_stock: "40", turnover_rate: 0.45 },
-          { product_name: "Sun Bicycles Streamway 7 - 2017", total_sold: "111", total_stock: "275", turnover_rate: 0.4 },
-          { product_name: "Trek Silque SLR 8 Women's - 2017", total_sold: "87", total_stock: "228", turnover_rate: 0.38 },
-        ];
-        
-        // Giả sử bạn sẽ bỏ comment các dòng gọi API thật
-        // const [revenueRes, topProductsRes, turnoverRes] = await Promise.all([
-        //   api.get('/sale/stats/revenuepermonth'),
-        //   api.get('/product/stats/top/3'),
-        //   api.get('/sale/stats/turnover'), // API mới
-        // ]);
-  
-        // setMonthlyRevenue(revenueRes.data.data);
-        setMonthlyRevenue(mockMonthlyRevenue);
-  
-        // const topSellingData = topProductsRes.data.data.map(el => ({
-        const topSellingData = mockTopSellingProducts.map(el => ({
-          name: el.product_name,
-          sold: el.total_quantity_sold,
-        }));
-        setTopProducts(topSellingData);
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-        // Xử lý dữ liệu vòng quay vốn
-        // const rawTurnoverData = turnoverRes.data.data;
-        const rawTurnoverData = mockTurnoverApiData;
-        const processedTurnoverData = rawTurnoverData
-          .map(item => ({
-            ...item,
-            total_sold: parseInt(item.total_sold, 10),
-            total_stock: parseInt(item.total_stock, 10),
-            turnover_rate: parseFloat(item.turnover_rate) // Đảm bảo là số
-          }))
-          .sort((a, b) => b.turnover_rate - a.turnover_rate) // Sắp xếp giảm dần
-          .slice(0, 7); // Lấy top 7
-        setTopTurnoverProducts(processedTurnoverData);
-
-      } catch (error) {
-        console.error('Lỗi khi tải dữ liệu dashboard:', error);
-        // Fallback to mock data in case of error
-        const mockMonthlyRevenue = [
-            { month: 'Thg 1', total: 120000000 }, { month: 'Thg 2', total: 180000000 }, { month: 'Thg 3', total: 150000000 },
-            { month: 'Thg 4', total: 220000000 }, { month: 'Thg 5', total: 190000000 }, { month: 'Thg 6', total: 250000000 },
-        ];
-        const mockTopSellingProducts = [
-            { product_name: 'Xe đạp Alpha', total_quantity_sold: 120 }, { product_name: 'Xe đạp Beta', total_quantity_sold: 95 }, { product_name: 'Xe đạp Gamma', total_quantity_sold: 70 },
-        ];
-        const mockTurnoverApiData = [
-            { product_name: "Trek Domane SLR Frameset - 2018", total_sold: "9", total_stock: "10", turnover_rate: 0.9 },
-            { product_name: "Specialized Allez Sprint - 2019", total_sold: "22", total_stock: "25", turnover_rate: 0.88 },
-            { product_name: "Cannondale Quick CX 3 - 2020", total_sold: "50", total_stock: "60", turnover_rate: 0.833 },
-        ];
-
-        setMonthlyRevenue(mockMonthlyRevenue);
-        const topSellingData = mockTopSellingProducts.map(el => ({ name: el.product_name, sold: el.total_quantity_sold }));
-        setTopProducts(topSellingData);
-        const processedTurnoverData = mockTurnoverApiData
-          .map(item => ({ ...item, total_sold: parseInt(item.total_sold, 10), total_stock: parseInt(item.total_stock, 10), turnover_rate: parseFloat(item.turnover_rate) }))
-          .sort((a, b) => b.turnover_rate - a.turnover_rate).slice(0, 7);
-        setTopTurnoverProducts(processedTurnoverData);
-      }
-    };
-  
-    fetchData();
-  }, []);
-  
-
-  const formatCurrency = (value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-  const formatYAxisCurrency = (value) => `${(value / 1000000).toFixed(0)}tr`;
-  const formatPercent = (value) => `${(value * 100).toFixed(1)}%`;
-
-  // Custom Tooltip Component
-  const CustomTooltipContent = ({ active, payload, label, type }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload; // Dữ liệu của điểm/cột được hover
-      return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200 text-sm">
-          <p className="label text-gray-700 font-semibold mb-1">{label || data.product_name || data.month}</p>
-          {type === 'revenue' && (
-            <p style={{ color: payload[0].color || payload[0].stroke }}>
-              {payload[0].name}: {formatCurrency(payload[0].value)}
-            </p>
-          )}
-          {type === 'topSelling' && (
-            <p style={{ color: payload[0].fill }}>
-              {payload[0].name}: {payload[0].value} chiếc
-            </p>
-          )}
-          {type === 'stockStatus' && (
-             <p style={{ color: payload[0].payload.fill }}>
-              {data.name}: {data.value} sản phẩm ({(data.percent * 100).toFixed(0)}%)
-            </p>
-          )}
-          {type === 'turnover' && (
-            <>
-              <p style={{ color: payload[0].fill }} className="mb-0.5">
-                Tỷ lệ vòng quay: {formatPercent(data.turnover_rate)}
-              </p>
-              <p className="text-gray-600 text-xs mb-0.5">Đã bán: {data.total_sold} chiếc</p>
-              <p className="text-gray-600 text-xs">Tồn kho: {data.total_stock} chiếc</p>
-            </>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
+  if (percent * 100 < 5) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-200 p-4 sm:p-8">
-      <header className="mb-10">
-        <h1 className="text-4xl font-bold text-gray-800 flex items-center">
-          <ShoppingCart className="w-10 h-10 mr-3 text-indigo-600" />
-          Hệ thống cửa hàng xe đạp Ế
-        </h1>
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-xs font-medium">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+const ProductsPage = () => {
+  const [data, setData] = useState({
+    topProducts: [],
+    brandRevenue: [],
+    categoryRevenue: [],
+    inventory: [], // This will hold the full inventory list
+    salePerYear: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [topN, setTopN] = useState(5);
+  const [topNInput, setTopNInput] = useState("5");
+
+  // State for inventory multi-select
+  const [selectedInventoryProducts, setSelectedInventoryProducts] = useState([]);
+
+  const fetchData = useCallback(async (currentTopN) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [topRes, brandRes, categoryRes, inventoryRes, saleYearRes] = await Promise.all([
+        axios.get(`/api/product/stats/top/${currentTopN}`),
+        axios.get('/api/product/stats/revenue'),
+        axios.get('/api/product/stats/categoryrevenue'),
+        axios.get('/api/product/stats/inventory'),
+        axios.get('/api/product/stats/saleperyear')
+      ]);
+
+      setData({
+        topProducts: topRes.data.data || [],
+        brandRevenue: brandRes.data.data || [],
+        categoryRevenue: categoryRes.data.data || [],
+        inventory: inventoryRes.data.data || [],
+        salePerYear: saleYearRes.data.data || [],
+      });
+      // Reset selected inventory products if the inventory data changes, or pre-select some if needed
+      // setSelectedInventoryProducts([]);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError(err.response?.data?.message || err.message || 'Không thể tải dữ liệu thống kê.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData(topN);
+  }, [fetchData, topN]);
+
+  const handleTopNChange = (event) => {
+    setTopNInput(event.target.value);
+  };
+
+  const applyTopN = () => {
+    const num = parseInt(topNInput, 10);
+    if (!isNaN(num) && num > 0) {
+      setTopN(num);
+    } else {
+      setTopNInput(String(topN));
+    }
+  };
+
+  const handleInventoryProductChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedInventoryProducts(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+
+  // Filter inventory data for the chart based on selection
+  const displayedInventoryData = data.inventory.filter(item =>
+    selectedInventoryProducts.includes(item.product_name)
+  );
+
+  if (error) {
+    return (
+      <div className="p-6 min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <Alert severity="error" className="w-full max-w-md">
+          <p className="font-semibold">Đã xảy ra lỗi!</p>
+          {error}
+        </Alert>
+        <Button variant="contained" onClick={() => fetchData(topN)} className="mt-4">
+          Thử lại
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 md:p-8 bg-slate-100 min-h-screen">
+      <header className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 text-center">Product Statistics Dashboard</h1>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Doanh thu theo tháng */}
-        <div className="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
-            <TrendingUp className="w-7 h-7 mr-2 text-pink-500" />
-            Doanh thu theo tháng
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyRevenue} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#4A5568' }} />
-              <YAxis tickFormatter={formatYAxisCurrency} tick={{ fontSize: 12, fill: '#4A5568' }} />
-              <Tooltip content={<CustomTooltipContent type="revenue" />} />
-              <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Line 
-                type="monotone" dataKey="total" name="Tổng doanh thu"
-                stroke="#ec4899" strokeWidth={2.5} 
-                dot={{ r: 5, strokeWidth: 2, fill: '#fff', stroke: '#ec4899' }} 
-                activeDot={{ r: 7, stroke: '#ec4899', fill: '#ec4899', strokeWidth: 2 }} 
+      {loading && (
+        <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+          <CircularProgress size={60} />
+          <p className="ml-4 text-lg text-slate-700">Đang tải dữ liệu...</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Selling Products */}
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-lg">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold text-slate-700 mb-2">Top {topN} Sản phẩm Bán Chạy Nhất</h2>
+            <div className="flex items-center space-x-2 mb-4">
+              <TextField
+                label="Số lượng Top"
+                type="number"
+                size="small"
+                value={topNInput}
+                onChange={handleTopNChange}
+                onKeyPress={(e) => e.key === 'Enter' && applyTopN()}
+                inputProps={{ min: 1, step: 1 }}
+                className="w-28"
               />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+              <Button variant="contained" size="medium" onClick={applyTopN} style={{ backgroundColor: COLORS[0] }}>
+                Áp dụng
+              </Button>
+            </div>
+            <ResponsiveContainer width="100%" height={350}>
+              {data.topProducts.length > 0 ? (
+                <BarChart data={data.topProducts} margin={{ top: 5, right: 20, left: 50, bottom: 70 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="product_name"
+                    angle={-40}
+                    textAnchor="end"
+                    interval={0}
+                    tick={{ fontSize: 10, fill: '#4b5563' }}
+                    height={80}
+                  />
+                  <YAxis yAxisId="left" orientation="left" stroke={COLORS[0]} tick={{ fontSize: 10, fill: '#4b5563' }} label={{ value: 'Số lượng', angle: -90, position: 'insideLeft', fill: COLORS[0], fontSize: 12, dy: -10 }}/>
+                  <YAxis yAxisId="right" orientation="right" stroke={COLORS[1]} tickFormatter={(value) => `$${value.toLocaleString()}`} tick={{ fontSize: 10, fill: '#4b5563' }} label={{ value: 'Doanh thu', angle: -90, position: 'insideRight', fill: COLORS[1], fontSize: 12, dx: 10 }}/>
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(200,200,200,0.2)' }}/>
+                  <Legend verticalAlign="top" wrapperStyle={{paddingBottom: '10px'}} iconSize={12} />
+                  <Bar yAxisId="left" dataKey="total_quantity_sold" fill={COLORS[0]} name="Số lượng bán" radius={[4, 4, 0, 0]}/>
+                  <Bar yAxisId="right" dataKey="total_revenue" fill={COLORS[1]} name="Doanh thu" radius={[4, 4, 0, 0]}/>
+                </BarChart>
+              ) : (
+                 <div className="flex items-center justify-center h-full text-slate-500">Không có dữ liệu.</div>
+              )}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        {/* Top sản phẩm bán chạy */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
-            <BarChart3 className="w-7 h-7 mr-2 text-teal-500" />
-            Top sản phẩm bán chạy
-          </h2>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart layout="vertical" data={topProducts} margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis type="number" tick={{ fontSize: 12, fill: '#4A5568' }} />
-              <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 12, fill: '#4A5568', width:120 }} style={{textAnchor: 'end'}}/>
-              <Tooltip content={<CustomTooltipContent type="topSelling" />} cursor={{ fill: 'rgba(200, 200, 200, 0.2)' }}/>
-              <Bar dataKey="sold" name="Đã bán" fill="#2dd4bf" barSize={25} radius={[0, 8, 8, 0]} /> 
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {/* Revenue by Brand */}
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-lg">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold text-slate-700 mb-4">Doanh thu theo Thương hiệu</h2>
+            <ResponsiveContainer width="100%" height={350}>
+              {data.brandRevenue.length > 0 ? (
+              <PieChart>
+                <Pie
+                  dataKey="total_revenue"
+                  data={data.brandRevenue}
+                  nameKey="brand_name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={110}
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                >
+                  {data.brandRevenue.map((entry, index) => (
+                    <Cell key={`cell-brand-${index}`} fill={COLORS[index % COLORS.length]} className="focus:outline-none" />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend align="center" verticalAlign="bottom" wrapperStyle={{fontSize: '12px'}} iconType="circle" iconSize={10} />
+              </PieChart>
+              ) : (
+                 <div className="flex items-center justify-center h-full text-slate-500">Không có dữ liệu.</div>
+              )}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        {/* Tình trạng tồn kho */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 flex flex-col">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
-            <Package className="w-7 h-7 mr-2 text-amber-500" />
-            Tình trạng tồn kho
-          </h2>
-          <ResponsiveContainer width="100%" height={350}>
-            <PieChart>
-              <Pie
-                data={stockStatusData} cx="50%" cy="45%"
-                labelLine={false} outerRadius={100} innerRadius={60}
-                fill="#8884d8" dataKey="value"
-                label={({ name, percent, value }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+        {/* Revenue by Category */}
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-lg">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold text-slate-700 mb-4">Doanh thu theo Loại sản phẩm</h2>
+            <ResponsiveContainer width="100%" height={350}>
+             {data.categoryRevenue.length > 0 ? (
+              <BarChart data={data.categoryRevenue} margin={{ top: 5, right: 20, left: 50, bottom: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="category_name"
+                  angle={-35}
+                  textAnchor="end"
+                  interval={0}
+                  tick={{ fontSize: 10, fill: '#4b5563' }}
+                  height={70}
+                />
+                <YAxis tickFormatter={(value) => `$${value.toLocaleString()}`} tick={{ fontSize: 10, fill: '#4b5563' }} label={{ value: 'Doanh thu', angle: -90, position: 'insideLeft', fill: '#4b5563', fontSize: 12 }}/>
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(200,200,200,0.2)' }}/>
+                <Bar dataKey="total_revenue" name="Doanh thu" fill={COLORS[2]} radius={[4, 4, 0, 0]} />
+              </BarChart>
+              ) : (
+                 <div className="flex items-center justify-center h-full text-slate-500">Không có dữ liệu.</div>
+              )}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Current Inventory - Changed to Multi-Select with Vertical Bar Chart */}
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-lg">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold text-slate-700 mb-4">Lượng tồn kho theo Sản phẩm</h2>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="inventory-multiple-product-label">Chọn sản phẩm</InputLabel>
+              <Select
+                labelId="inventory-multiple-product-label"
+                id="inventory-multiple-product-select"
+                multiple
+                value={selectedInventoryProducts}
+                onChange={handleInventoryProductChange}
+                input={<OutlinedInput label="Chọn sản phẩm" />}
+                renderValue={(selected) => selected.join(', ')}
+                MenuProps={MenuProps}
               >
-                {stockStatusData.map((entry) => (
-                  <Cell key={`cell-${entry.name}`} fill={entry.color} />
+                {data.inventory.map((item) => (
+                  <MenuItem key={item.product_name} value={item.product_name}>
+                    <Checkbox checked={selectedInventoryProducts.indexOf(item.product_name) > -1} />
+                    <ListItemText primary={item.product_name} />
+                  </MenuItem>
                 ))}
-              </Pie>
-              <Tooltip content={<CustomTooltipContent type="stockStatus" />} />
-              <Legend iconType="circle" layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: '20px', fontSize: '14px' }}/>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+              </Select>
+            </FormControl>
 
-        {/* Sản phẩm có tỷ lệ vòng quay vốn cao nhất */}
-        <div className="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
-            <Repeat className="w-7 h-7 mr-2 text-sky-500" />
-            Top 7 Sản phẩm vòng quay vốn cao
-          </h2>
-          <ResponsiveContainer width="100%" height={400}> 
-            <BarChart layout="vertical" data={topTurnoverProducts} margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis 
-                type="number" 
-                dataKey="turnover_rate"
-                tickFormatter={formatPercent} // Định dạng trục X là %
-                domain={[0, 'dataMax + 0.1']} // Đảm bảo có không gian cho giá trị cao nhất
-                tick={{ fontSize: 12, fill: '#4A5568' }} 
-              />
-              <YAxis 
-                type="category" 
-                dataKey="product_name" 
-                width={200} // Tăng chiều rộng cho tên sản phẩm dài
-                tick={{ fontSize: 12, fill: '#4A5568', width:190 }} 
-                style={{textAnchor: 'end'}}
-              />
-              <Tooltip content={<CustomTooltipContent type="turnover"/>} cursor={{ fill: 'rgba(200, 200, 200, 0.2)' }}/>
-              <Bar dataKey="turnover_rate" name="Tỷ lệ vòng quay" fill="#38bdf8" barSize={20} radius={[0, 8, 8, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+            <ResponsiveContainer width="100%" height={300}> {/* Adjusted height for select */}
+              {displayedInventoryData.length > 0 ? (
+                <BarChart
+                  data={displayedInventoryData} // Use filtered data
+                  margin={{ top: 20, right: 20, left: 20, bottom: 60 }} // Adjusted margins
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="product_name"
+                    angle={-30} // Angle for vertical chart
+                    textAnchor="end"
+                    interval={0}
+                    tick={{ fontSize: 10, fill: '#4b5563' }}
+                    height={70} // Adjust height for angled labels
+                  />
+                  <YAxis tick={{ fontSize: 10, fill: '#4b5563' }} label={{ value: 'Số lượng tồn', angle: -90, position: 'insideLeft', fill: '#4b5563', fontSize: 12 }}/>
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(200,200,200,0.2)' }}/>
+                  {/* <Legend verticalAlign="top" wrapperStyle={{paddingBottom: '10px'}} iconSize={12} /> No legend needed if only one bar type */}
+                  <Bar dataKey="stock_quantity" name="Số lượng tồn" fill={COLORS[3]} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              ) : (
+                 <div className="flex items-center justify-center h-full text-slate-500 pt-8">
+                  {selectedInventoryProducts.length > 0 ? "Không có dữ liệu tồn kho cho sản phẩm đã chọn." : "Vui lòng chọn sản phẩm để xem tồn kho."}
+                 </div>
+              )}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+
+        {/* Sales per Model Year - Bar Chart */}
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-lg lg:col-span-2">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold text-slate-700 mb-4">Số lượng bán theo Năm sản xuất</h2>
+            <ResponsiveContainer width="100%" height={350}>
+             {data.salePerYear.length > 0 ? (
+              <BarChart data={data.salePerYear} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb"/>
+                <XAxis dataKey="model_year" tick={{ fontSize: 11, fill: '#4b5563' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#4b5563' }} label={{ value: 'Số lượng bán', angle: -90, position: 'insideLeft', fill: '#4b5563', fontSize: 12 }}/>
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(200,200,200,0.2)' }}/>
+                <Legend verticalAlign="top" wrapperStyle={{paddingBottom: '10px'}} iconSize={12} />
+                <Bar dataKey="total_quantity_sold" name="Số lượng bán" fill={COLORS[4]} radius={[4, 4, 0, 0]} />
+              </BarChart>
+               ) : (
+                 <div className="flex items-center justify-center h-full text-slate-500">Không có dữ liệu.</div>
+              )}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
+        <footer className="text-center mt-12 py-6 text-slate-600">
+            <p>&copy; {new Date().getFullYear()} Product Statistics. Powered by Recharts & MUI.</p>
+        </footer>
     </div>
   );
-}
+};
+
+export default ProductsPage;

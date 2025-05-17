@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { 
     Card, 
@@ -227,14 +228,9 @@ export default function StaffMetricPage() {
                 {/* Biểu đồ và bảng */}
                 <Row gutter={16}>
                     <Col span={12}>
-                        <Card title="Trạng thái nhân viên" style={{ height: '400px' }}>
-                            <Pie {...getActivityChartConfig()} />
-                        </Card>
-                    </Col>
-                    <Col span={12}>
                         <Card 
                             title="Phân bố nhân viên theo Showroom" 
-                            style={{ height: '400px', overflow: 'hidden' }}
+                            style={{ height: '400px', overflow: 'hidden', width: '100%' }}
                             bodyStyle={{ height: 'calc(100% - 58px)' }}
                         >
                             <div style={{ height: '100%', width: '100%' }}>

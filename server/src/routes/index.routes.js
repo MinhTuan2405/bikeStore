@@ -15,6 +15,8 @@ import showroomRouter from './showroom/showroom.route.js'
 
 // staff
 import staffRouter from './staff/staff.route.js'
+import categoryRouter from './category/category.route.js'
+import brandRouter from './brand/brand.route.js'
 
 const router = express.Router()
 
@@ -24,5 +26,7 @@ router.use ('/sale', saleRouter)
 router.use ('/user', userRouter)
 router.use ('/showroom', showroomRouter)
 router.use ('/staff', staffRouter)
+router.use (categoryRouter)
+router.use (brandRouter)
 
 export default router

@@ -112,7 +112,7 @@ export default function SideBar() {
                   { label: "Quản lý cửa hàng", to: "/showroom/manage" },
                 ]}
               />  
-              <NavItem icon={<Settings size={18} />} label="Cài đặt" to="/settings" collapsed={collapsed} />
+              {/* <NavItem icon={<Settings size={18} />} label="Cài đặt" to="/settings" collapsed={collapsed} /> */}
             </ul>
           </div>
         </div>
