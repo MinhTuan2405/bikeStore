@@ -1,0 +1,107 @@
+// BikeStore Schema for dbdiagram.io
+
+// Production Schema
+Table production.categories {
+  category_id integer [primary key, increment]
+  category_name varchar [not null]
+}
+
+Table production.brands {
+  brand_id integer [primary key, increment]
+  brand_name varchar [not null]
+}
+
+Table production.products {
+  product_id integer [primary key, increment]
+  product_name varchar [not null]
+  brand_id integer [not null]
+  category_id integer [not null]
+  model_year smallint [not null]
+  list_price decimal(10,2) [not null]
+}
+
+Table production.stocks {
+  store_id integer
+  product_id integer
+  quantity integer
+  
+  indexes {
+    (store_id, product_id) [pk]
+  }
+}
+
+// Sales Schema
+Table sales.customers {
+  customer_id integer [primary key, increment]
+  first_name varchar [not null]
+  last_name varchar [not null]
+  phone varchar
+  email varchar [not null]
+  street varchar
+  city varchar
+  state varchar
+  zip_code varchar
+}
+
+Table sales.stores {
+  store_id integer [primary key, increment]
+  store_name varchar [not null]
+  phone varchar
+  email varchar
+  street varchar
+  city varchar
+  state varchar
+  zip_code varchar
+}
+
+Table sales.staffs {
+  staff_id integer [primary key, increment]
+  first_name varchar [not null]
+  last_name varchar [not null]
+  email varchar [not null, unique]
+  phone varchar
+  active boolean [not null]
+  store_id integer [not null]
+  manager_id integer
+}
+
+Table sales.orders {
+  order_id integer [primary key, increment]
+  customer_id integer
+  order_status smallint [not null, note: '1=Pending, 2=Processing, etc.']
+  order_date date [not null]
+  required_date date [not null]
+  shipped_date date
+  store_id integer [not null]
+  staff_id integer [not null]
+}
+
+Table sales.order_items {
+  order_id integer
+  item_id integer
+  product_id integer [not null]
+  quantity integer [not null]
+  list_price decimal(10,2) [not null]
+  discount decimal(4,2) [not null, default: 0]
+  
+  indexes {
+    (order_id, item_id) [pk]
+  }
+}
+
+// Relationships
+Ref: production.products.category_id > production.categories.category_id
+Ref: production.products.brand_id > production.brands.brand_id
+
+Ref: sales.orders.customer_id > sales.customers.customer_id
+Ref: sales.orders.store_id > sales.stores.store_id
+Ref: sales.orders.staff_id > sales.staffs.staff_id
+
+Ref: sales.staffs.store_id > sales.stores.store_id
+Ref: sales.staffs.manager_id - sales.staffs.staff_id
+
+Ref: sales.order_items.order_id > sales.orders.order_id
+Ref: sales.order_items.product_id > production.products.product_id
+
+Ref: production.stocks.store_id > sales.stores.store_id
+Ref: production.stocks.product_id > production.products.product_id
