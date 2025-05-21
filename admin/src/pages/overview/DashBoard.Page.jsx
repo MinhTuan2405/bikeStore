@@ -124,7 +124,7 @@ export default function DashBoardPage() {
       <header className="mb-10">
         <h1 className="text-4xl font-bold text-gray-800 flex items-center">
           <ShoppingCart className="w-10 h-10 mr-3 text-indigo-600" />
-          Hệ thống cửa hàng xe đạp Ế
+          Cửa hàng xe đạp IE103.P21
         </h1>
       </header>
 

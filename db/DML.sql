@@ -1,5 +1,4 @@
 -- Thống kê các metrics bán hàng của cửa hàng xe đạp
-
 -- I. PRODUCT-RELATED QUERIES
 
 -- 1. Top 5 sản phẩm bán chạy nhất

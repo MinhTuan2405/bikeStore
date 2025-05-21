@@ -119,7 +119,7 @@ export default function SideBar() {
 
         {/* Footer */}
         <div className="border-t p-4 flex items-center gap-3">
-          <img src="/adminImg.jpg" alt="Admin" className="w-10 h-10 rounded-full object-cover" />
+          <img src="/adminImg.png" alt="Admin" className="w-10 h-10 rounded-full object-cover" />
           {!collapsed && (
             <div className="flex-1">
               <p className="text-sm font-semibold">BikeStore Admin</p>

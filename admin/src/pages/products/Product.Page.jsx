@@ -147,7 +147,7 @@ const ProductsPage = () => {
   return (
     <div className="p-4 md:p-8 bg-slate-100 min-h-screen">
       <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 text-center">Product Statistics Dashboard</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 text-center">Thống kê sản phẩm</h1>
       </header>
 
       {loading && (
